@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:intl/intl.dart';
 
 void main() => runApp(MyApp());
 
@@ -101,12 +102,19 @@ class _DiaperCalculatorState extends State<DiaperCalculator> {
 
   @override
   Widget build(BuildContext context) {
+    final lastDiaperChange = diaperChanges.isNotEmpty
+        ? DateTime.fromMillisecondsSinceEpoch(diaperChanges.last).subtract(Duration(hours: 3))
+        : null;
+    final lastDiaperChangeFormatted = lastDiaperChange != null
+        ? DateFormat('HH:mm').format(lastDiaperChange)
+        : '';
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Fraldinha'),
       ),
       body: Container(
-        color: Colors.red[100], // Fundo vermelho claro
+        color: Colors.red[200],
         padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -119,20 +127,22 @@ class _DiaperCalculatorState extends State<DiaperCalculator> {
                 autoPlay: true,
                 autoPlayInterval: Duration(seconds: 3),
                 enlargeCenterPage: true,
+                viewportFraction: 0.9, // Define a fração do espaço horizontal ocupada por cada slide
               ),
               items: [
                 Container(
-                  margin: EdgeInsets.symmetric(horizontal: 30),
+                  margin: EdgeInsets.symmetric(horizontal: 3),
+                  padding: EdgeInsets.symmetric(horizontal: 15),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: Colors.white,
+                    color: Colors.white70,
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     // Ajuste a distância entre os textos
                     children: <Widget>[
                       Text(
-                        'Fraldas utilizadas nesta semana:',
+                        'Fraldas p/ semana',
                         style: TextStyle(fontSize: 18),
                         textAlign: TextAlign.center,
                       ),
@@ -145,17 +155,18 @@ class _DiaperCalculatorState extends State<DiaperCalculator> {
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.symmetric(horizontal: 30),
+                  margin: EdgeInsets.symmetric(horizontal: 3),
+                  padding: EdgeInsets.symmetric(horizontal: 15),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: Colors.white,
+                    color: Colors.white70,
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     // Ajuste a distância entre os textos
                     children: <Widget>[
                       Text(
-                        'Média de fraldas trocadas por dia:',
+                        'Média de fraldas p/ dia',
                         style: TextStyle(fontSize: 18),
                         textAlign: TextAlign.center,
                       ),
@@ -168,17 +179,18 @@ class _DiaperCalculatorState extends State<DiaperCalculator> {
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.symmetric(horizontal: 30),
+                  margin: EdgeInsets.symmetric(horizontal: 3),
+                  padding: EdgeInsets.symmetric(horizontal: 15),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: Colors.white,
+                    color: Colors.white70,
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     // Ajuste a distância entre os textos
                     children: <Widget>[
                       Text(
-                        'Média de fraldas trocadas por semana:',
+                        'Média de fraldas p/ semana',
                         style: TextStyle(fontSize: 18),
                         textAlign: TextAlign.center,
                       ),
@@ -191,17 +203,18 @@ class _DiaperCalculatorState extends State<DiaperCalculator> {
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.symmetric(horizontal: 30),
+                  margin: EdgeInsets.symmetric(horizontal: 3),
+                  padding: EdgeInsets.symmetric(horizontal: 15),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: Colors.white,
+                    color: Colors.white70,
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     // Ajuste a distância entre os textos
                     children: <Widget>[
                       Text(
-                        'Média de fraldas trocadas por mês:',
+                        'Média de fraldas p/ mês',
                         style: TextStyle(fontSize: 18),
                         textAlign: TextAlign.center,
                       ),
@@ -214,17 +227,18 @@ class _DiaperCalculatorState extends State<DiaperCalculator> {
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.symmetric(horizontal: 30),
+                  margin: EdgeInsets.symmetric(horizontal: 3),
+                  padding: EdgeInsets.symmetric(horizontal: 15),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: Colors.white,
+                    color: Colors.white70,
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     // Ajuste a distância entre os textos
                     children: <Widget>[
                       Text(
-                        'Total de fraldas trocadas no mês atual:',
+                        'Total de fraldas no mês atual',
                         style: TextStyle(fontSize: 18),
                         textAlign: TextAlign.center,
                       ),
@@ -238,31 +252,44 @@ class _DiaperCalculatorState extends State<DiaperCalculator> {
                 ),
               ],
             ),
-            SizedBox(height: 80),
+            SizedBox(height: 50),
             Text(
-              'Fraldas trocadas hoje:',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              'Última troca em',
+              style: TextStyle(fontSize: 25),
               textAlign: TextAlign.center,
             ),
+            SizedBox(height: 16),
+            Text(
+              lastDiaperChangeFormatted,
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Fraldas trocadas hoje',
+              style: TextStyle(fontSize: 25),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 16),
             Text(
               getDailyDiaperCount().toString(),
-              style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 100),
+            SizedBox(height: 16),
             ElevatedButton(
-              onPressed: addDiaperChange,
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.all(16), // Ajuste o tamanho do botão
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10), // Ajuste o raio da borda do botão
+                onPressed: addDiaperChange,
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.all(16), // Ajuste o tamanho do botão
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10) // Ajuste o raio da borda do botão
+                  )
                 ),
-              ),
-              child: Text(
-                'Trocar Fralda',
-                style: TextStyle(fontSize: 30),
-              ),
-            ),
+                child: Text(
+                  'Trocar Fralda',
+                  style: TextStyle(fontSize: 30),
+                )
+            )
           ],
         ),
       ),
