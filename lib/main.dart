@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() => runApp(MyApp());
 
@@ -25,10 +26,33 @@ class DiaperCalculator extends StatefulWidget {
 class _DiaperCalculatorState extends State<DiaperCalculator> {
   List<int> diaperChanges = [];
 
+  @override
+  void initState() {
+    super.initState();
+    loadDiaperChanges(); // Carrega os registros de fraldas ao iniciar o aplicativo
+  }
+
   void addDiaperChange() {
     setState(() {
       diaperChanges.add(DateTime.now().millisecondsSinceEpoch);
+      saveDiaperChanges(); // Salva os registros de fraldas após cada adição
     });
+  }
+
+  void loadDiaperChanges() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<int>? savedDiaperChanges = prefs.getStringList('diaperChanges')?.map(int.parse).toList();
+    if (savedDiaperChanges != null) {
+      setState(() {
+        diaperChanges = savedDiaperChanges;
+      });
+    }
+  }
+
+  void saveDiaperChanges() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> stringList = diaperChanges.map((timestamp) => timestamp.toString()).toList();
+    prefs.setStringList('diaperChanges', stringList);
   }
 
   int getWeeklyDiaperCount() {
