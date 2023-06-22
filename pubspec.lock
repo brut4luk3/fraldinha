@@ -83,6 +83,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  google_mobile_ads:
+    dependency: "direct main"
+    description:
+      name: google_mobile_ads
+      sha256: "1a638bf8fc8cda4edc9f8fff030c76ce4872cc010cde5bfc10af2e2a0d063ef5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.13.6"
   intl:
     dependency: "direct main"
     description:
@@ -202,3 +210,4 @@ packages:
     version: "2.1.4"
 sdks:
   dart: ">=3.0.3 <4.0.0"
+  flutter: ">=1.12.13+hotfix.5"

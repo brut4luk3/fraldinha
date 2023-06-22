@@ -276,7 +276,7 @@ class _DiaperCalculatorState extends State<DiaperCalculator> {
               style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 120),
             ElevatedButton(
                 onPressed: addDiaperChange,
                 style: ElevatedButton.styleFrom(
