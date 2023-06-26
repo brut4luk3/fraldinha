@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'consumo_geral.dart';
 
 void main() => runApp(MyApp());
 
@@ -126,12 +127,15 @@ class _DiaperCalculatorState extends State<DiaperCalculator> {
 
   @override
   Widget build(BuildContext context) {
-    final lastDiaperChange = diaperChanges.isNotEmpty
-        ? DateTime.fromMillisecondsSinceEpoch(diaperChanges.last).subtract(Duration(hours: 3))
-        : null;
-    final lastDiaperChangeFormatted = lastDiaperChange != null
-        ? DateFormat('HH:mm').format(lastDiaperChange)
-        : '';
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final todayDiaperChanges = diaperChanges
+        .where((timestamp) => DateTime.fromMillisecondsSinceEpoch(timestamp).isAfter(today))
+        .toList();
+
+    final lastDiaperChangeFormatted = todayDiaperChanges.isNotEmpty
+        ? DateFormat('HH:mm').format(DateTime.fromMillisecondsSinceEpoch(todayDiaperChanges.last).subtract(Duration(hours: 3)))
+        : '--:--';
 
     return Scaffold(
       appBar: AppBar(
@@ -300,14 +304,33 @@ class _DiaperCalculatorState extends State<DiaperCalculator> {
               style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 120),
+            SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ConsumoGeralPage()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.all(16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Text(
+                'Consumo Geral',
+                style: TextStyle(fontSize: 30),
+              ),
+            ),
+            SizedBox(height: 16),
             ElevatedButton(
                 onPressed: addDiaperChange,
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.all(16), // Ajuste o tamanho do botão
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10) // Ajuste o raio da borda do botão
-                  )
+                    padding: EdgeInsets.all(16), // Ajuste o tamanho do botão
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10) // Ajuste o raio da borda do botão
+                    )
                 ),
                 child: Text(
                   'Trocar Fralda',
