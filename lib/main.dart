@@ -3,6 +3,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'consumo_geral.dart';
+import 'month_data.dart';
 
 void main() => runApp(MyApp());
 
@@ -54,6 +55,38 @@ class _DiaperCalculatorState extends State<DiaperCalculator> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> stringList = diaperChanges.map((timestamp) => timestamp.toString()).toList();
     prefs.setStringList('diaperChanges', stringList);
+  }
+
+  void showConsumoGeralPage() {
+    List<MonthData> monthDataList = createMonthDataList();
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ConsumoGeralPage(monthDataList)),
+    );
+  }
+
+  List<MonthData> createMonthDataList() {
+    Map<String, List<int>> monthDataMap = {};
+
+    for (int timestamp in diaperChanges) {
+      DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
+      String monthName = DateFormat('MMMM').format(dateTime);
+
+      if (!monthDataMap.containsKey(monthName)) {
+        monthDataMap[monthName] = [];
+      }
+
+      monthDataMap[monthName]!.add(timestamp);
+    }
+
+    List<MonthData> monthDataList = [];
+
+    monthDataMap.forEach((monthName, diaperChanges) {
+      monthDataList.add(MonthData(monthName, diaperChanges));
+    });
+
+    return monthDataList;
   }
 
   int getWeeklyDiaperCount() {
@@ -306,12 +339,7 @@ class _DiaperCalculatorState extends State<DiaperCalculator> {
             ),
             SizedBox(height: 40),
             ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ConsumoGeralPage()),
-                );
-              },
+              onPressed: showConsumoGeralPage,
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.all(16),
                 shape: RoundedRectangleBorder(
