@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+//import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'consumo_geral.dart';
 import 'month_data.dart';
 

@@ -20,38 +20,50 @@ class ConsumoGeralPage extends StatelessWidget {
       body: Container(
         color: Colors.red[200],
         padding: EdgeInsets.all(16),
-        child: CarouselSlider(
-          options: CarouselOptions(
-            height: 400,
-            viewportFraction: 0.9,
-            enableInfiniteScroll: false,
-          ),
-          items: completeMonthDataList.map((monthData) {
-            return Container(
-              margin: EdgeInsets.all(20),
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.white70,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    monthData.monthName,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 50),
-                  Expanded(
-                    child: Container(
-                      child: _buildChart(monthData.diaperChanges),
+        child: Column(
+          children: [
+            SizedBox(height: 30),
+            Text(
+              'Confira abaixo o consumo de fraldas mensal',
+              style: TextStyle(fontSize: 25),
+              textAlign: TextAlign.center,
+            ),
+            Expanded(
+              child: CarouselSlider(
+                options: CarouselOptions(
+                  height: 400,
+                  viewportFraction: 0.9,
+                  enableInfiniteScroll: false,
+                  initialPage: DateTime.now().month - 1,
+                ),
+                items: completeMonthDataList.map((monthData) {
+                  return Container(
+                    margin: EdgeInsets.all(20),
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.white70,
                     ),
-                  ),
-                ],
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          monthData.monthName,
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                        Expanded(
+                          child: Container(
+                            child: _buildChart(monthData.diaperChanges),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
               ),
-            );
-          }).toList(),
+            ),
+          ],
         ),
       ),
     );
@@ -59,9 +71,10 @@ class ConsumoGeralPage extends StatelessWidget {
 
   List<MonthData> _generateMonthDataList() {
     List<MonthData> completeMonthDataList = [];
+    DateTime now = DateTime.now();
 
     for (int month = 1; month <= 12; month++) {
-      String monthName = DateFormat.MMMM().format(DateTime(2023, month));
+      String monthName = DateFormat.MMMM().format(DateTime(now.year, month));
       List<int> diaperChanges = monthDataList
           .firstWhere((data) => data.monthName == monthName, orElse: () => MonthData(monthName, []))
           .diaperChanges;
@@ -73,20 +86,26 @@ class ConsumoGeralPage extends StatelessWidget {
   }
 
   Widget _buildChart(List<int> diaperChanges) {
-    List<charts.Series<TimeSeriesData, DateTime>> seriesList = [
-      charts.Series<TimeSeriesData, DateTime>(
+    List<charts.Series<TimeSeriesData, String>> seriesList = [
+      charts.Series<TimeSeriesData, String>(
         id: 'Fraldas',
         colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-        domainFn: (TimeSeriesData data, _) => data.time,
+        domainFn: (TimeSeriesData data, _) => DateFormat('d MMM').format(data.time),
         measureFn: (TimeSeriesData data, _) => data.value,
         data: _generateChartData(diaperChanges),
       ),
     ];
 
-    return charts.TimeSeriesChart(
+    return charts.BarChart(
       seriesList,
       animate: true,
-      dateTimeFactory: const charts.LocalDateTimeFactory(),
+      domainAxis: charts.OrdinalAxisSpec(
+        renderSpec: charts.SmallTickRendererSpec<String>(
+          labelStyle: charts.TextStyleSpec(
+            fontSize: 10,
+          ),
+        ),
+      ),
     );
   }
 
