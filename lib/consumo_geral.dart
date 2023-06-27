@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:charts_flutter/flutter.dart' as charts; // Importação necessária
+import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:intl/intl.dart';
 import 'month_data.dart';
 
 class ConsumoGeralPage extends StatelessWidget {
@@ -10,6 +11,8 @@ class ConsumoGeralPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<MonthData> completeMonthDataList = _generateMonthDataList();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Consumo Geral'),
@@ -19,11 +22,13 @@ class ConsumoGeralPage extends StatelessWidget {
         padding: EdgeInsets.all(16),
         child: CarouselSlider(
           options: CarouselOptions(
-            height: 400, // Ajuste a altura dos slides conforme necessário
+            height: 400,
+            viewportFraction: 0.9,
             enableInfiniteScroll: false,
           ),
-          items: monthDataList.map((monthData) {
+          items: completeMonthDataList.map((monthData) {
             return Container(
+              margin: EdgeInsets.all(20),
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
@@ -37,10 +42,10 @@ class ConsumoGeralPage extends StatelessWidget {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 50),
                   Expanded(
                     child: Container(
-                      child: _buildChart(monthData.diaperChanges), // Utiliza a função _buildChart para exibir o gráfico de consumo de fraldas
+                      child: _buildChart(monthData.diaperChanges),
                     ),
                   ),
                 ],
@@ -50,6 +55,21 @@ class ConsumoGeralPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  List<MonthData> _generateMonthDataList() {
+    List<MonthData> completeMonthDataList = [];
+
+    for (int month = 1; month <= 12; month++) {
+      String monthName = DateFormat.MMMM().format(DateTime(2023, month));
+      List<int> diaperChanges = monthDataList
+          .firstWhere((data) => data.monthName == monthName, orElse: () => MonthData(monthName, []))
+          .diaperChanges;
+
+      completeMonthDataList.add(MonthData(monthName, diaperChanges));
+    }
+
+    return completeMonthDataList;
   }
 
   Widget _buildChart(List<int> diaperChanges) {
@@ -71,10 +91,7 @@ class ConsumoGeralPage extends StatelessWidget {
   }
 
   List<TimeSeriesData> _generateChartData(List<int> diaperChanges) {
-    // Gera os dados de consumo de fraldas para o gráfico
     List<TimeSeriesData> chartData = [];
-
-    // Converte os timestamps em objetos DateTime e conta a quantidade de fraldas por dia
     Map<DateTime, int> dailyCounts = {};
 
     for (int timestamp in diaperChanges) {
@@ -88,7 +105,6 @@ class ConsumoGeralPage extends StatelessWidget {
       dailyCounts[date] = dailyCounts[date]! + 1;
     }
 
-    // Cria os objetos TimeSeriesData com os dados de consumo de fraldas por dia
     dailyCounts.forEach((date, count) {
       chartData.add(TimeSeriesData(date, count));
     });
