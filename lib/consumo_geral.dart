@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
-import 'package:intl/intl.dart';
+import 'package:charts_flutter/flutter.dart' as charts; // Importação necessária
 import 'month_data.dart';
 
 class ConsumoGeralPage extends StatelessWidget {
@@ -11,8 +10,6 @@ class ConsumoGeralPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<MonthData> completeMonthDataList = _generateMonthDataList();
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Consumo Geral'),
@@ -20,97 +17,64 @@ class ConsumoGeralPage extends StatelessWidget {
       body: Container(
         color: Colors.red[200],
         padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            SizedBox(height: 30),
-            Text(
-              'Confira abaixo o consumo de fraldas mensal',
-              style: TextStyle(fontSize: 25),
-              textAlign: TextAlign.center,
-            ),
-            Expanded(
-              child: CarouselSlider(
-                options: CarouselOptions(
-                  height: 400,
-                  viewportFraction: 0.9,
-                  enableInfiniteScroll: false,
-                  initialPage: DateTime.now().month - 1,
-                ),
-                items: completeMonthDataList.map((monthData) {
-                  return Container(
-                    margin: EdgeInsets.all(20),
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Colors.white70,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          monthData.monthName,
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center,
-                        ),
-                        Expanded(
-                          child: Container(
-                            child: _buildChart(monthData.diaperChanges),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
+        child: CarouselSlider(
+          options: CarouselOptions(
+            height: 400, // Ajuste a altura dos slides conforme necessário
+            enableInfiniteScroll: false,
+          ),
+          items: monthDataList.map((monthData) {
+            return Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.white70,
               ),
-            ),
-          ],
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    monthData.monthName,
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 20),
+                  Expanded(
+                    child: Container(
+                      child: _buildChart(monthData.diaperChanges), // Utiliza a função _buildChart para exibir o gráfico de consumo de fraldas
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
   }
 
-  List<MonthData> _generateMonthDataList() {
-    List<MonthData> completeMonthDataList = [];
-    DateTime now = DateTime.now();
-
-    for (int month = 1; month <= 12; month++) {
-      String monthName = DateFormat.MMMM().format(DateTime(now.year, month));
-      List<int> diaperChanges = monthDataList
-          .firstWhere((data) => data.monthName == monthName, orElse: () => MonthData(monthName, []))
-          .diaperChanges;
-
-      completeMonthDataList.add(MonthData(monthName, diaperChanges));
-    }
-
-    return completeMonthDataList;
-  }
-
   Widget _buildChart(List<int> diaperChanges) {
-    List<charts.Series<TimeSeriesData, String>> seriesList = [
-      charts.Series<TimeSeriesData, String>(
+    List<charts.Series<TimeSeriesData, DateTime>> seriesList = [
+      charts.Series<TimeSeriesData, DateTime>(
         id: 'Fraldas',
         colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-        domainFn: (TimeSeriesData data, _) => DateFormat('d MMM').format(data.time),
+        domainFn: (TimeSeriesData data, _) => data.time,
         measureFn: (TimeSeriesData data, _) => data.value,
         data: _generateChartData(diaperChanges),
       ),
     ];
 
-    return charts.BarChart(
+    return charts.TimeSeriesChart(
       seriesList,
       animate: true,
-      domainAxis: charts.OrdinalAxisSpec(
-        renderSpec: charts.SmallTickRendererSpec<String>(
-          labelStyle: charts.TextStyleSpec(
-            fontSize: 10,
-          ),
-        ),
-      ),
+      dateTimeFactory: const charts.LocalDateTimeFactory(),
     );
   }
 
   List<TimeSeriesData> _generateChartData(List<int> diaperChanges) {
+    // Gera os dados de consumo de fraldas para o gráfico
     List<TimeSeriesData> chartData = [];
+
+    // Converte os timestamps em objetos DateTime e conta a quantidade de fraldas por dia
     Map<DateTime, int> dailyCounts = {};
 
     for (int timestamp in diaperChanges) {
@@ -124,6 +88,7 @@ class ConsumoGeralPage extends StatelessWidget {
       dailyCounts[date] = dailyCounts[date]! + 1;
     }
 
+    // Cria os objetos TimeSeriesData com os dados de consumo de fraldas por dia
     dailyCounts.forEach((date, count) {
       chartData.add(TimeSeriesData(date, count));
     });
